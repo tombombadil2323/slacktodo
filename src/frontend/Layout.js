@@ -18,7 +18,7 @@ class Layout extends React.Component {
             return (
                 prevstate.todos.push({
                     name: prevstate.todoName,
-                    created: new Date().toJSON(),
+                    created: new Date().toJSON().slice(0,10).replace(/-/g,'/'),
                     completed: false,
                 })
                 )

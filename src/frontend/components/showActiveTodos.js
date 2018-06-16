@@ -1,8 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const showActiveTodos = ({todos, onClickComplete}) => {
-    todos = todos || []
+const showActiveTodos = ({todos = [], onClickComplete}) => {
     return todos.length > 0 ?
     todos.map(({name, created, completed}, index) => {
         return (

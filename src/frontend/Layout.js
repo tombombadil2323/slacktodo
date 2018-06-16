@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import ShowActiveTodos from './components/ShowActiveTodos'
 import ShowCompletedTodos from './components/ShowCompletedTodos'
 import AddTodo from './components/AddTodo'
+import firebase, { auth, provider} from '../database/Firebase/Firebase'
+import Header from './components/Header/Header'
 
 class Layout extends React.Component {
     constructor(props) {
@@ -10,10 +12,51 @@ class Layout extends React.Component {
         this.state = { 
             todos : [],
             todoName : '',
+            user : null,
         }
       }
+
+      componentDidMount =()=> {
+        //picks up the login promise after redirect login
+        auth.getRedirectResult().then((result) => {
+          if (result.user !==null){
+            const user = result.user;          
+            this.setState({user})
+          }
+        })
+        //sets the user if logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+              this.setState({user})
+            } 
+        })
+      }
+      componentDidUpdate = () => {
+        if (this.state.todos.length === 0) {
+            const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
+            rootRef.on('value', snapshot => {
+                const todoArray = snapshot.val()
+                this.setState({todos: todoArray})                
+            })
+        }
+    }
+
+      //redirects to google login and sets user 
+      loginHandler = () => {
+        auth.signInWithRedirect(provider);    
+      }
+      //logs out and updates user:null
+      logoutHandler = ()=> {
+          auth.signOut()
+            .then(() => {
+              this.setState({
+                user: null,
+              });
+            });
+        }
     onSubmit = (event) => {
         event.preventDefault()
+        const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
         this.setState(prevstate => {
             return (
                 prevstate.todos.push({
@@ -22,27 +65,30 @@ class Layout extends React.Component {
                     completed: false,
                 })
                 )
-            }
+            }, () => rootRef.set(this.state.todos)
         )
         this.setState({todoName:''})
-        console.log(this.state.todos)
     }
     onChange = (event) => {
         this.setState({todoName: event.target.value})
     }
     onClickComplete = (index) => {
-        // let filteredArray = this.state.todos.filter(item =>item !==this.state.todos[index])
-        // this.setState({todos:filteredArray})
+        const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
         this.setState((prevstate)=>{
             let newArray = prevstate.todos
             newArray[index].completed = !newArray[index].completed
             return {todos: newArray}
-        })   
+        }, () => rootRef.set(this.state.todos))   
     }
 
     render() {
         return (
             <div>
+                <Header 
+                        user={this.state.user} 
+                        loginHandler={this.loginHandler} 
+                        logoutHandler={this.logoutHandler}
+                    />
                 <AddTodo 
                     value = {this.state.todoName} 
                     onChange = {this.onChange} 

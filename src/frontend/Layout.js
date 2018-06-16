@@ -1,8 +1,13 @@
 import react from 'react'
 import PropTypes from 'prop-types'
+import showActiveTodos from './components/showActiveTodos';
 
-const todoList = () => {
-
+class Layout extends react.Component {
+    render() {
+        return (
+            <showActiveTodos />
+        )
+    }       
 }
 
-export default todoList
+export default Layout

@@ -13,6 +13,8 @@ class Layout extends React.Component {
             todos : [],
             todoName : '',
             user : null,
+            todoTag: '',
+            tags:[],
         }
       }
 
@@ -36,7 +38,10 @@ class Layout extends React.Component {
             const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
             rootRef.on('value', snapshot => {
                 const todoArray = snapshot.val()
-                this.setState({todos: todoArray})                
+                if (Array.isArray(todoArray)){
+                    this.setState({todos: todoArray}) 
+                }
+                               
             })
         }
     }
@@ -61,16 +66,21 @@ class Layout extends React.Component {
             return (
                 prevstate.todos.push({
                     name: prevstate.todoName,
+                    tag: prevstate.todoTag,
                     created: new Date().toJSON().slice(0,10).replace(/-/g,'/'),
                     completed: false,
                 })
                 )
             }, () => rootRef.set(this.state.todos)
         )
-        this.setState({todoName:''})
+        this.setState({todoName:'', todoTag:''})
+        this.setState({tags:this.state.todos.map((todo)=>todo.tag).filter((tag,index,tags)=>tags.indexOf(tag)=== index)})
     }
-    onChange = (event) => {
+    onChangeName = (event) => {
         this.setState({todoName: event.target.value})
+    }
+    onChangeTag = (event) => {
+        this.setState({todoTag: event.target.value})
     }
     onClickComplete = (index) => {
         const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
@@ -90,9 +100,13 @@ class Layout extends React.Component {
                         logoutHandler={this.logoutHandler}
                     />
                 <AddTodo 
-                    value = {this.state.todoName} 
-                    onChange = {this.onChange} 
-                    onClick = {this.onSubmit}/>
+                    name = {this.state.todoName} 
+                    tag = {this.state.todoTag}
+                    onChangeName = {this.onChangeName} 
+                    onChangeTag = {this.onChangeTag} 
+                    onClick = {this.onSubmit}
+                    tags = {this.state.todos.map((todo)=>todo.tag).filter((tag,index,tags)=>tags.indexOf(tag)=== index)}                 
+                    />
                 <ShowActiveTodos todos = {this.state.todos} onClickComplete ={this.onClickComplete} />
                 <ShowCompletedTodos todos = {this.state.todos} onClickComplete ={this.onClickComplete} />
             </div>

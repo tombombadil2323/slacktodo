@@ -34,15 +34,16 @@ class Layout extends React.Component {
         })
       }
       componentDidUpdate = () => {
-        if (this.state.todos.length === 0) {
-            const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
-            rootRef.on('value', snapshot => {
-                const todoArray = snapshot.val()
-                if (Array.isArray(todoArray)){
-                    this.setState({todos: todoArray}) 
-                }
-                               
-            })
+        if (this.state.user !== null){
+            if (this.state.todos.length === 0) {
+                const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
+                rootRef.on('value', snapshot => {
+                    const todoArray = snapshot.val()
+                    if (Array.isArray(todoArray)){
+                        this.setState({todos: todoArray}) 
+                    }              
+                })
+            }
         }
     }
 
@@ -61,20 +62,22 @@ class Layout extends React.Component {
         }
     onSubmit = (event) => {
         event.preventDefault()
-        const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
-        this.setState(prevstate => {
-            return (
-                prevstate.todos.push({
-                    name: prevstate.todoName,
-                    tag: prevstate.todoTag,
-                    created: new Date().toJSON().slice(0,10).replace(/-/g,'/'),
-                    completed: false,
-                })
-                )
-            }, () => rootRef.set(this.state.todos)
-        )
-        this.setState({todoName:'', todoTag:''})
-        this.setState({tags:this.state.todos.map((todo)=>todo.tag).filter((tag,index,tags)=>tags.indexOf(tag)=== index)})
+        if (this.state.user !== null){
+            const rootRef = firebase.database().ref(`user/${this.state.user.uid}/todos`)
+            this.setState(prevstate => {
+                return (
+                    prevstate.todos.push({
+                        name: prevstate.todoName,
+                        tag: prevstate.todoTag,
+                        created: new Date().toJSON().slice(0,10).replace(/-/g,'/'),
+                        completed: false,
+                    })
+                    )
+                }, () => rootRef.set(this.state.todos)
+            )
+            this.setState({todoName:'', todoTag:''})
+            this.setState({tags:this.state.todos.map((todo)=>todo.tag).filter((tag,index,tags)=>tags.indexOf(tag)=== index)})
+        }
     }
     onChangeName = (event) => {
         this.setState({todoName: event.target.value})

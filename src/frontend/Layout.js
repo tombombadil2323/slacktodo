@@ -105,7 +105,8 @@ class Layout extends React.Component {
                     onChangeName = {this.onChangeName} 
                     onChangeTag = {this.onChangeTag} 
                     onClick = {this.onSubmit}
-                    tags = {this.state.todos.map((todo)=>todo.tag).filter((tag,index,tags)=>tags.indexOf(tag)=== index)}                 
+                    tags = {this.state.todos.map((todo)=>todo.tag)
+                        .filter((tag,index,tags)=>tags.indexOf(tag) === index)}                 
                     />
                 <ShowActiveTodos todos = {this.state.todos} onClickComplete ={this.onClickComplete} />
                 <ShowCompletedTodos todos = {this.state.todos} onClickComplete ={this.onClickComplete} />

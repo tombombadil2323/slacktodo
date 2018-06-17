@@ -7,7 +7,6 @@ const addTodo = ({onClick, onChangeName, onChangeTag, name, tag, tags}) => {
     if (Array.isArray(tags)){
             options = tags.map((tag, index)=><option key = {index}>{tag}</option>)
         }
-    console.log(tags)
     return(
     <div>
         <input type='text' value = {name} onChange = {onChangeName} placeholder='Todo' /> 
